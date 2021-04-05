@@ -33,6 +33,11 @@ resource "azurerm_network_watcher" "networkwatcher" {
   name                = "NetworkWatcher_westeurope"
   location            = var.location
   resource_group_name = var.resource_group_name
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }
 
 resource "azurerm_virtual_network" "virtual_network" {
@@ -41,4 +46,9 @@ resource "azurerm_virtual_network" "virtual_network" {
   resource_group_name = var.resource_group_name
   address_space       = ["172.16.0.0/16"]
   depends_on          = [azurerm_network_watcher.networkwatcher]
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
 }

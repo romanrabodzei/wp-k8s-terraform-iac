@@ -20,20 +20,14 @@ resource "azurerm_key_vault" "key_vault" {
     key_permissions = [
       "Backup",
       "Create",
-      "Decrypt",
       "Delete",
-      "Encrypt",
       "Get",
       "Import",
       "List",
       "Purge",
       "Recover",
       "Restore",
-      "Sign",
-      "UnwrapKey",
-      "Update",
-      "Verify",
-      "WrapKey"
+      "Update"
     ]
     secret_permissions = [
       "Backup",
@@ -92,9 +86,7 @@ resource "azurerm_key_vault" "key_vault" {
   lifecycle {
     ignore_changes = [
       tags,
-      access_policy,
-      #delete in 14 days
-      purge_protection_enabled
+      access_policy
     ]
   }
   depends_on = [
@@ -117,7 +109,7 @@ resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
 
 resource "azurerm_key_vault_secret" "mssql_secret" {
   name         = "mssqlsecret"
-  value        = random_string.mssqlrandom.result
+  value        = var.sql_administrator_login_password
   key_vault_id = azurerm_key_vault.key_vault.id
 }
 

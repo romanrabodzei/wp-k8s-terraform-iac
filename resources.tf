@@ -23,11 +23,13 @@ module "policies" {
 }
 
 module "services" {
-  source              = "./services"
-  resource_group_name = azurerm_resource_group.resource_group.name
-  location            = var.location
-  environment         = var.environment
-  aks_cluster_name    = var.aks_cluster_name
+  source                           = "./services"
+  resource_group_name              = azurerm_resource_group.resource_group.name
+  location                         = var.location
+  environment                      = var.environment
+  aks_cluster_name                 = var.aks_cluster_name
+  sql_administrator_login          = var.sql_administrator_login
+  sql_administrator_login_password = var.sql_administrator_login_password
   # Remote information
   #remote_resource_group_name  = local.remote_resource_group_name
   #remote_virtual_network_name = local.remote_virtual_network_name

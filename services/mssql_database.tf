@@ -1,28 +1,20 @@
-resource "random_string" "mssqlrandom" {
-  length  = 36
-  special = false
-}
-
 resource "azurerm_mssql_server" "mssql_server" {
   name                          = lower("${var.aks_cluster_name}mssqlsrv${var.environment}")
   resource_group_name           = var.resource_group_name
   location                      = var.location
-  administrator_login           = "azureadmin"
+  administrator_login           = var.sql_administrator_login
   administrator_login_password  = azurerm_key_vault_secret.mssql_secret.id
   version                       = "12.0"
   public_network_access_enabled = true # Set false after resource deployment and reaplly changes
   minimum_tls_version           = "1.2"
   connection_policy             = "Default"
-  /*
-  azuread_administrator {
-    login_username = "AzureAD Admin"
-    object_id      = "00000000-0000-0000-0000-000000000000"
-  }
-  */
+  #azuread_administrator {
+  #login_username = "sqladmin@rabodzeyromanoutlook.onmicrosoft.com"
+  #object_id      = "a86d2b66-887c-4dbb-8736-b8fb87fa4d37"
+  #}
   identity {
     type = "SystemAssigned"
   }
-
   lifecycle {
     ignore_changes = [
       tags
@@ -37,7 +29,7 @@ resource "azurerm_mssql_firewall_rule" "mssql_firewall_rule" {
   end_ip_address   = "0.0.0.0"
 }
 
-resource "azurerm_mssql_virtual_network_rule" "mssqlvnetrule1" {
+resource "azurerm_mssql_virtual_network_rule" "mssqlvnetrule" {
   name      = "mssql-vnet-rule1"
   server_id = azurerm_mssql_server.mssql_server.id
   subnet_id = azurerm_subnet.srv_subnet.id
@@ -49,7 +41,7 @@ resource "azurerm_mssql_virtual_network_rule" "mssqlvnetrule2" {
   subnet_id = azurerm_subnet.aks_subnet.id
 }
 
-resource "azurerm_mssql_server_extended_auditing_policy" "example" {
+resource "azurerm_mssql_server_extended_auditing_policy" "mssql_server_extended_auditing_policy" {
   server_id              = azurerm_mssql_server.mssql_server.id
   log_monitoring_enabled = true
 }

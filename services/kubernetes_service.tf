@@ -1,11 +1,25 @@
+resource "azurerm_public_ip" "outbound_kubernetes_cluster_public_ip" {
+  name                = lower("${var.aks_cluster_name}pip${var.environment}")
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
+
 resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   name                = lower("${var.aks_cluster_name}${var.environment}")
   resource_group_name = var.resource_group_name
   location            = var.location
   dns_prefix          = lower("${var.aks_cluster_name}${var.environment}")
-
+  #private_cluster_enabled = true
   default_node_pool {
-    name       = "nodepool01"
+    name       = "agentpool"
     node_count = "1"
     vm_size    = "Standard_DS2_v2"
     availability_zones = [
@@ -15,10 +29,9 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
     enable_auto_scaling = true
     max_count           = 10
     min_count           = 1
-    vnet_subnet_id      = azurerm_subnet.aks_subnet.id
     max_pods            = 250
+    vnet_subnet_id      = azurerm_subnet.aks_subnet.id
   }
-
   addon_profile {
     azure_policy {
       enabled = true
@@ -32,39 +45,56 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
     }
   }
 
-
   identity {
     type = "SystemAssigned"
   }
 
   role_based_access_control {
     enabled = true
-    #azure_active_directory {
-    #  managed = false
-    #admin_group_object_ids = [ "value" ]
-    #}
   }
 
   network_profile {
+    #network_plugin = "kubenet"
     network_plugin    = "azure"
-    load_balancer_sku = "standard"
     network_policy    = "azure"
-    #outbound_type     = "userDefinedRouting"
+    load_balancer_sku = "standard"
+    load_balancer_profile {
+      outbound_ip_address_ids = [azurerm_public_ip.outbound_kubernetes_cluster_public_ip.id]
+    }
   }
 
   lifecycle {
     ignore_changes = [
-      tags,
-      default_node_pool[0]
+      tags
     ]
   }
 }
 
-resource "azurerm_role_assignment" "kubernetes_cluster_role_assignment" {
+resource "azurerm_role_assignment" "kubernetes_cluster_network_role_assignment" {
   #scope                = var.remote_virtual_network_id
   scope                = azurerm_virtual_network.virtual_network.id
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_kubernetes_cluster.kubernetes_cluster.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "kubernetes_cluster_pip_role_assignment" {
+  scope                = azurerm_public_ip.outbound_kubernetes_cluster_public_ip.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.kubernetes_cluster.identity[0].principal_id
+}
+
+locals {
+  kubelet_identity = azurerm_kubernetes_cluster.kubernetes_cluster.kubelet_identity
+}
+
+output "local" {
+  value = local.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "kubernetes_cluster_registry_role_assignment" {
+  scope                = azurerm_container_registry.container_registry.id
+  role_definition_name = "AcrPull"
+  principal_id         = local.kubelet_identity[0].object_id
 }
 
 resource "azurerm_log_analytics_solution" "kubernetes_cluster_log_analytics_solution" {

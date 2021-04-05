@@ -21,20 +21,27 @@ variable "location" {
 variable "environment" {
   type = string
 }
-variable "aks_subnet_name" {
-  type = string
-}
-variable "aks_subnet_address" {
-  type = string
-}
 variable "srv_subnet_name" {
   type = string
 }
 variable "srv_subnet_address" {
   type = string
 }
-
+variable "aks_subnet_name" {
+  type = string
+}
+variable "aks_subnet_address" {
+  type = string
+}
 
 variable "aks_cluster_name" {
+  type = string
+}
+
+variable "sql_administrator_login" {
+  type = string
+}
+
+variable "sql_administrator_login_password" {
   type = string
 }

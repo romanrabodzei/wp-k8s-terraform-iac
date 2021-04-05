@@ -24,6 +24,14 @@ variable "aks_cluster_name" {
   type        = string
 }
 
+##### SQL Server and database #####
+variable "sql_administrator_login" {
+  type = string
+}
+
+variable "sql_administrator_login_password" {
+  type = string
+}
 
 ##### Virtual   Network #####
 variable "aks_subnet_name" {
