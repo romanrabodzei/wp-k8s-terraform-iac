@@ -1,17 +1,29 @@
+resource "azuread_group" "sql_admin_group" {
+  display_name = "SQL Admins"
+  members = [
+    data.azurerm_client_config.current.object_id
+  ]
+}
+
+resource "random_string" "mssql_admin_password" {
+  length  = 12
+  special = false
+}
+
 resource "azurerm_mssql_server" "mssql_server" {
   name                          = lower("${var.aks_cluster_name}mssqlsrv${var.environment}")
   resource_group_name           = var.resource_group_name
   location                      = var.location
-  administrator_login           = var.sql_administrator_login
-  administrator_login_password  = azurerm_key_vault_secret.mssql_secret.id
+  administrator_login           = "azuresqladmin"
+  administrator_login_password  = random_string.mssql_admin_password.result
   version                       = "12.0"
-  public_network_access_enabled = true # Set false after resource deployment and reaplly changes
+  public_network_access_enabled = true
   minimum_tls_version           = "1.2"
   connection_policy             = "Default"
-  #azuread_administrator {
-  #login_username = "sqladmin@rabodzeyromanoutlook.onmicrosoft.com"
-  #object_id      = "a86d2b66-887c-4dbb-8736-b8fb87fa4d37"
-  #}
+  azuread_administrator {
+    login_username = azuread_group.sql_admin_group.name
+    object_id      = azuread_group.sql_admin_group.object_id
+  }
   identity {
     type = "SystemAssigned"
   }
@@ -22,31 +34,31 @@ resource "azurerm_mssql_server" "mssql_server" {
   }
 }
 
-resource "azurerm_mssql_firewall_rule" "mssql_firewall_rule" {
+resource "azurerm_mssql_firewall_rule" "mssql_firewall_rule_azure_services" {
   name             = "AllowAzureservices"
   server_id        = azurerm_mssql_server.mssql_server.id
   start_ip_address = "0.0.0.0"
   end_ip_address   = "0.0.0.0"
 }
 
-resource "azurerm_mssql_virtual_network_rule" "mssqlvnetrule" {
-  name      = "mssql-vnet-rule1"
-  server_id = azurerm_mssql_server.mssql_server.id
-  subnet_id = azurerm_subnet.srv_subnet.id
+resource "azurerm_mssql_firewall_rule" "mssql_firewall_rule_managed_ip" {
+  name             = "ManagedIP"
+  server_id        = azurerm_mssql_server.mssql_server.id
+  start_ip_address = chomp(data.http.myip.body)
+  end_ip_address   = chomp(data.http.myip.body)
 }
 
-resource "azurerm_mssql_virtual_network_rule" "mssqlvnetrule2" {
-  name      = "mssql-vnet-rule2"
-  server_id = azurerm_mssql_server.mssql_server.id
-  subnet_id = azurerm_subnet.aks_subnet.id
+resource "azurerm_mssql_firewall_rule" "mssql_firewall_rule_cluster_ip" {
+  name             = "K8sIP"
+  server_id        = azurerm_mssql_server.mssql_server.id
+  start_ip_address = azurerm_public_ip.outbound_kubernetes_cluster_public_ip.ip_address
+  end_ip_address   = azurerm_public_ip.outbound_kubernetes_cluster_public_ip.ip_address
 }
 
 resource "azurerm_mssql_server_extended_auditing_policy" "mssql_server_extended_auditing_policy" {
   server_id              = azurerm_mssql_server.mssql_server.id
   log_monitoring_enabled = true
 }
-
-
 
 resource "azurerm_mssql_database" "mssqldatabase" {
   name                 = lower("${var.aks_cluster_name}mssqldb${var.environment}")
@@ -71,7 +83,7 @@ resource "azurerm_mssql_database" "mssqldatabase" {
   short_term_retention_policy {
     retention_days = (known after apply)
   }
-*/
+  */
   lifecycle {
     ignore_changes = [
       tags, license_type
@@ -83,7 +95,6 @@ resource "azurerm_monitor_diagnostic_setting" "mssqldatabase_diagnostic_setting"
   name                       = lower("${var.aks_cluster_name}-mssqldb-${var.environment}-diagsettings")
   target_resource_id         = azurerm_mssql_database.mssqldatabase.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  /*
   log {
     category = "SQLSecurityAuditEvents"
     enabled  = true
@@ -91,7 +102,7 @@ resource "azurerm_monitor_diagnostic_setting" "mssqldatabase_diagnostic_setting"
       enabled = false
     }
   }
-  */
+
   log {
     category = "AutomaticTuning"
     enabled  = true

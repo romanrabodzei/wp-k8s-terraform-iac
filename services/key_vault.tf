@@ -76,12 +76,9 @@ resource "azurerm_key_vault" "key_vault" {
   }]
   network_acls {
     default_action = "Deny"
-    virtual_network_subnet_ids = [
-      azurerm_subnet.aks_subnet.id,
-      azurerm_subnet.srv_subnet.id
-    ]
-    bypass   = "AzureServices"
-    ip_rules = ["${chomp(data.http.myip.body)}/32"]
+    bypass         = "AzureServices"
+    ip_rules = ["${chomp(data.http.myip.body)}/32",
+    azurerm_public_ip.outbound_kubernetes_cluster_public_ip.ip_address]
   }
   lifecycle {
     ignore_changes = [
@@ -94,8 +91,12 @@ resource "azurerm_key_vault" "key_vault" {
   ]
 }
 
-# AKV access policies
-
+# AKV secrets and access policies
+resource "azurerm_key_vault_secret" "mssql_secret" {
+  name         = "mssqlsecret"
+  value        = random_string.mssql_admin_password.result
+  key_vault_id = azurerm_key_vault.key_vault.id
+}
 resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
   key_vault_id = azurerm_key_vault.key_vault.id
   tenant_id    = azurerm_mssql_server.mssql_server.identity[0].tenant_id
@@ -105,12 +106,6 @@ resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
     "Get",
     "List"
   ]
-}
-
-resource "azurerm_key_vault_secret" "mssql_secret" {
-  name         = "mssqlsecret"
-  value        = var.sql_administrator_login_password
-  key_vault_id = azurerm_key_vault.key_vault.id
 }
 
 resource "azurerm_monitor_diagnostic_setting" "key_vault_diagnostic_setting" {

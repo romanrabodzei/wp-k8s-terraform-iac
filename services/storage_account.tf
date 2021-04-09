@@ -11,10 +11,8 @@ resource "azurerm_storage_account" "storage_account" {
   allow_blob_public_access  = "false"
   network_rules {
     default_action = "Deny"
-    virtual_network_subnet_ids = [
-      azurerm_subnet.aks_subnet.id,
-      azurerm_subnet.srv_subnet.id
-    ]
+    ip_rules = [chomp(data.http.myip.body),
+    azurerm_public_ip.outbound_kubernetes_cluster_public_ip.ip_address]
     bypass = [
       "Logging",
       "Metrics",

@@ -23,33 +23,3 @@ variable "aks_cluster_name" {
   description = "Azure Kubernetes Cluster name"
   type        = string
 }
-
-##### SQL Server and database #####
-variable "sql_administrator_login" {
-  type = string
-}
-
-variable "sql_administrator_login_password" {
-  type = string
-}
-
-##### Virtual   Network #####
-variable "aks_subnet_name" {
-  description = "Dedicated subnet for Azure Kubernetes Cluster"
-  type        = string
-}
-
-variable "aks_subnet_address" {
-  description = "Address range for the subnet"
-  type        = string
-}
-
-variable "srv_subnet_name" {
-  description = "Dedicated subnet for SQL databases and services"
-  type        = string
-}
-
-variable "srv_subnet_address" {
-  description = "Address range for the subnet"
-  type        = string
-}
