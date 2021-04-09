@@ -15,11 +15,11 @@ module "policies" {
 }
 
 module "services" {
-  source                           = "./services"
-  resource_group_name              = azurerm_resource_group.resource_group.name
-  location                         = var.location
-  environment                      = var.environment
-  aks_cluster_name                 = var.aks_cluster_name
+  source              = "./services"
+  resource_group_name = azurerm_resource_group.resource_group.name
+  location            = var.location
+  environment         = var.environment
+  aks_cluster_name    = var.aks_cluster_name
   depends_on = [
     module.policies.azurerm_tag_policy_assignment_id
   ]

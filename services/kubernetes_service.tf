@@ -1,18 +1,20 @@
 resource "azuread_group" "kubernetes_admin_group" {
-  display_name = "Kubernetes Admins"
+  display_name = "Kubernetes ${var.environment} Admins"
   members = [
     data.azurerm_client_config.current.object_id
   ]
 }
 
 resource "random_string" "kubernetes_cluster_sp_password" {
-  length  = 24
-  special = false
+  length           = 24
+  special          = true
+  override_special = "!@#$"
 }
 
 resource "random_string" "kubernetes_cluster_sp_secret" {
-  length  = 24
-  special = false
+  length           = 24
+  special          = true
+  override_special = "!@#$"
 }
 
 resource "azuread_application" "kubernetes_cluster_sp" {
@@ -55,7 +57,6 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   resource_group_name = var.resource_group_name
   location            = var.location
   dns_prefix          = lower("${var.aks_cluster_name}${var.environment}")
-  #private_cluster_enabled = true
   default_node_pool {
     name       = "agentpool"
     node_count = "1"
@@ -86,15 +87,15 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   }
 
   service_principal {
-    client_id     = azuread_service_principal.kubernetes_cluster_sp.application_id
-    client_secret = random_string.kubernetes_cluster_sp_password.result
+    client_id     = azuread_application.kubernetes_cluster_sp.application_id
+    client_secret = random_string.kubernetes_cluster_sp_secret.result
   }
 
   role_based_access_control {
     enabled = true
     azure_active_directory {
-      managed = true
-      admin_group_object_ids = [ azuread_group.kubernetes_admin_group.object_id ]
+      managed                = true
+      admin_group_object_ids = [azuread_group.kubernetes_admin_group.object_id]
     }
   }
 
@@ -107,7 +108,7 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   }
 
   depends_on = [
-    azuread_service_principal.kubernetes_cluster_sp
+    azuread_application.kubernetes_cluster_sp
   ]
   lifecycle {
     ignore_changes = [

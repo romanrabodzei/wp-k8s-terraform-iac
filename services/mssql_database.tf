@@ -1,13 +1,14 @@
 resource "azuread_group" "sql_admin_group" {
-  display_name = "SQL Admins"
+  display_name = "SQL ${var.environment} Admins"
   members = [
     data.azurerm_client_config.current.object_id
   ]
 }
 
 resource "random_string" "mssql_admin_password" {
-  length  = 12
-  special = false
+  length           = 16
+  special          = true
+  override_special = "!@#$"
 }
 
 resource "azurerm_mssql_server" "mssql_server" {

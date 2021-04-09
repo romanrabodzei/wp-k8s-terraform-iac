@@ -28,8 +28,8 @@ resource "azurerm_frontdoor" "frontdoor" {
     health_probe_name   = "K8sHealthProbeSetting"
   }
   backend_pool_health_probe {
-    name                = "K8sHealthProbeSetting"
-    enabled             = false
+    name    = "K8sHealthProbeSetting"
+    enabled = false
     #path                = "/"
     #protocol            = "Http"
     #probe_method        = "GET"
