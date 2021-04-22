@@ -21,27 +21,3 @@ resource "azurerm_container_registry" "container_registry" {
     ]
   }
 }
-
-resource "azurerm_monitor_diagnostic_setting" "container_registry_diagnostic_setting" {
-  name                       = lower("${var.aks_cluster_name}-sa-${var.environment}-diagsettings")
-  target_resource_id         = azurerm_container_registry.container_registry.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  log {
-    category = "ContainerRegistryRepositoryEvents"
-    enabled  = true
-  }
-  log {
-    category = "ContainerRegistryLoginEvents"
-    enabled  = true
-  }
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
-  lifecycle {
-    ignore_changes = [
-      metric,
-      log
-    ]
-  }
-}

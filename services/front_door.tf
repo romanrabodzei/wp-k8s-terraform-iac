@@ -54,28 +54,3 @@ resource "azurerm_frontdoor" "frontdoor" {
     ]
   }
 }
-
-resource "azurerm_monitor_diagnostic_setting" "frontdoor_diagnostic_setting" {
-  name                       = lower("${var.aks_cluster_name}-sa-${var.environment}-diagsettings")
-  target_resource_id         = azurerm_frontdoor.frontdoor.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  log {
-    category = "FrontdoorAccessLog"
-    enabled  = true
-  }
-  log {
-    category = "FrontdoorWebApplicationFirewallLog"
-    enabled  = true
-  }
-
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
-  lifecycle {
-    ignore_changes = [
-      metric,
-      log
-    ]
-  }
-}

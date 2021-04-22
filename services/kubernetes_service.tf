@@ -74,13 +74,6 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
     azure_policy {
       enabled = true
     }
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-    }
-    kube_dashboard {
-      enabled = true
-    }
     http_application_routing {
       enabled = true
     }
@@ -118,6 +111,19 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   }
 }
 
+resource "azurerm_public_ip" "inbound_kubernetes_cluster_public_ip" {
+  name                = lower("${var.aks_cluster_name}sip${var.environment}")
+  resource_group_name = "MC_${var.resource_group_name}_${azurerm_kubernetes_cluster.kubernetes_cluster.name}_${var.location}"
+  location            = var.location
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  lifecycle {
+    ignore_changes = [
+      tags
+    ]
+  }
+}
+
 resource "azurerm_public_ip" "outbound_kubernetes_cluster_public_ip" {
   name                = lower("${var.aks_cluster_name}pip${var.environment}")
   resource_group_name = var.resource_group_name
@@ -137,19 +143,6 @@ resource "azurerm_role_assignment" "kubernetes_cluster_outbound_pip_role_assignm
   principal_id         = azuread_service_principal.kubernetes_cluster_sp.object_id
 }
 
-resource "azurerm_public_ip" "inbound_kubernetes_cluster_public_ip" {
-  name                = lower("${var.aks_cluster_name}sip${var.environment}")
-  resource_group_name = "MC_${var.resource_group_name}_${azurerm_kubernetes_cluster.kubernetes_cluster.name}_${var.location}"
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
 resource "azurerm_role_assignment" "kubernetes_cluster_inbound_pip_role_assignment" {
   scope                = azurerm_public_ip.inbound_kubernetes_cluster_public_ip.id
   role_definition_name = "Network Contributor"
@@ -160,66 +153,4 @@ resource "azurerm_role_assignment" "kubernetes_cluster_registry_role_assignment"
   scope                = azurerm_container_registry.container_registry.id
   role_definition_name = "AcrPull"
   principal_id         = azuread_service_principal.kubernetes_cluster_sp.object_id
-}
-
-resource "azurerm_log_analytics_solution" "kubernetes_cluster_log_analytics_solution" {
-  solution_name         = "ContainerInsights"
-  resource_group_name   = var.resource_group_name
-  location              = var.location
-  workspace_resource_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  workspace_name        = azurerm_log_analytics_workspace.log_analytics_workspace.name
-
-  plan {
-    publisher = "Microsoft"
-    product   = "OMSGallery/ContainerInsights"
-  }
-  lifecycle {
-    ignore_changes = [
-      tags
-    ]
-  }
-}
-
-resource "azurerm_monitor_diagnostic_setting" "kubernetes_cluster_diagnostic_setting" {
-  name                       = lower("${var.aks_cluster_name}-${var.environment}-diagsettings")
-  target_resource_id         = azurerm_kubernetes_cluster.kubernetes_cluster.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  log {
-    category = "kube-apiserver"
-    enabled  = true
-  }
-  log {
-    category = "kube-audit"
-    enabled  = true
-  }
-  log {
-    category = "kube-audit-admin"
-    enabled  = true
-  }
-  log {
-    category = "kube-controller-manager"
-    enabled  = true
-  }
-  log {
-    category = "kube-scheduler"
-    enabled  = true
-  }
-  log {
-    category = "cluster-autoscaler"
-    enabled  = true
-  }
-  log {
-    category = "guard"
-    enabled  = true
-  }
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
-  lifecycle {
-    ignore_changes = [
-      metric,
-      log
-    ]
-  }
 }

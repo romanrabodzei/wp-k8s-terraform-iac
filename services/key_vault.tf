@@ -92,38 +92,18 @@ resource "azurerm_key_vault" "key_vault" {
 }
 
 # AKV secrets and access policies
-resource "azurerm_key_vault_secret" "mssql_secret" {
-  name         = "mssqlsecret"
-  value        = random_string.mssql_admin_password.result
+resource "azurerm_key_vault_secret" "mysql_secret" {
+  name         = "mysqlsecret"
+  value        = random_string.mysql_admin_password.result
   key_vault_id = azurerm_key_vault.key_vault.id
 }
 resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
   key_vault_id = azurerm_key_vault.key_vault.id
-  tenant_id    = azurerm_mssql_server.mssql_server.identity[0].tenant_id
-  object_id    = azurerm_mssql_server.mssql_server.identity[0].principal_id
+  tenant_id    = azurerm_mysql_server.mysql_server.identity[0].tenant_id
+  object_id    = azurerm_mysql_server.mysql_server.identity[0].principal_id
 
   secret_permissions = [
     "Get",
     "List"
   ]
-}
-
-resource "azurerm_monitor_diagnostic_setting" "key_vault_diagnostic_setting" {
-  name                       = lower("${var.aks_cluster_name}-sa-${var.environment}-diagsettings")
-  target_resource_id         = azurerm_key_vault.key_vault.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.log_analytics_workspace.id
-  log {
-    category = "AuditEvent"
-    enabled  = true
-  }
-  metric {
-    category = "AllMetrics"
-    enabled  = true
-  }
-  lifecycle {
-    ignore_changes = [
-      metric,
-      log
-    ]
-  }
 }
