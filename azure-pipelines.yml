@@ -8,8 +8,7 @@ pool:
   vmImage: ubuntu-latest
 
 stages:
-- stage: Planning
-  displayName: Deployment planning
+- stage: IaC Deployment
 
   jobs: 
     - job: Planning
@@ -29,10 +28,6 @@ stages:
           scriptLocation: 'inlineScript'
           inlineScript: 'terraform plan -var="subscription_id=$(subscription_id)" -var="client_id=$(client_id)" -var="client_secret=$(client_secret)" -var="tenant_id=$(tenant_id)" -var="company=intvsn" -var="client=lab" -var="environment=sbx" -var="location=westeurope" -var="aks_cluster_name=wordpress"'
 
-- stage: Applying
-  displayName: Deployment applying
-
-  jobs:
     - deployment: publishinternal
       displayName: 'Approval'
       environment: 'sbx'
