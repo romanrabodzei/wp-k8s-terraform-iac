@@ -58,20 +58,20 @@ resource "azurerm_key_vault" "key_vault" {
       "Update"
     ]
     storage_permissions = [
-      "Backup",
-      "Delete",
-      "DeleteSAS",
-      "Get",
-      "GetSAS",
-      "List",
-      "ListSAS",
-      "Purge",
-      "Recover",
-      "RegenerateKey",
-      "Restore",
-      "Set",
-      "SetSAS",
-      "Update"
+      "backup",
+      "delete",
+      "deletesas",
+      "get",
+      "getsas",
+      "list",
+      "listsas",
+      "purge",
+      "recover",
+      "gegeneratekey",
+      "restore",
+      "set",
+      "setsas",
+      "update"
     ]
   }]
   network_acls {
