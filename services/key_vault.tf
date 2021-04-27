@@ -67,7 +67,7 @@ resource "azurerm_key_vault" "key_vault" {
       "listsas",
       "purge",
       "recover",
-      "gegeneratekey",
+      "regeneratekey",
       "restore",
       "set",
       "setsas",
