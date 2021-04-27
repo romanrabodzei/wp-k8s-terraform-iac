@@ -37,7 +37,7 @@ stages:
       displayName: 'Approval'
       environment: 'sbx'
 
-    - job: Applying
+    - job: Building
       steps:
       - task: AzureCLI@2
         displayName: Terraform init
@@ -53,3 +53,28 @@ stages:
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'terraform apply -auto-approve'
+
+- stage: Destroying
+  displayName: Deployment destroying
+        
+  jobs:
+    - deployment: publishinternal
+      displayName: 'Approval'
+      environment: 'sbx'
+        
+    - job: Destroying
+      steps:
+      - task: AzureCLI@2
+        displayName: Terraform init
+        inputs:
+          azureSubscription: 'AzureCloud'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=sbx.tfstate" -backend-config="access_key=$(access_key)"'
+      - task: AzureCLI@2
+        displayName: Terraform destroy
+        inputs:
+          azureSubscription: 'AzureCloud'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'terraform destroy -auto-approve'
