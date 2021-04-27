@@ -27,16 +27,7 @@ stages:
           azureSubscription: 'AzureCloud'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
-          inlineScript: 'terraform plan -var="subscription_id=$(subscription_id)" -var="client_id=$(client_id)" -var="client_secret=$(client_secret)" -var="tenant_id=$(tenant_id)" -var="company=intvsn" -var="client=lab" -var="environment=sbx" -var="location=westeurope" -var="aks_cluster_name=wordpress" -out="sbx.tfplan"'
-      - task: AzureCLI@2
-        displayName: Saving plan
-        inputs:
-          azureSubscription: 'AzureCloud'
-          scriptType: 'pscore'
-          scriptLocation: 'inlineScript'
-          inlineScript: |
-            $tfplan = cat sbx.tfplan
-            echo "##vso[task.setvariable variable=tfplan]$tfplan"
+          inlineScript: 'terraform plan -var="subscription_id=$(subscription_id)" -var="client_id=$(client_id)" -var="client_secret=$(client_secret)" -var="tenant_id=$(tenant_id)" -var="company=intvsn" -var="client=lab" -var="environment=sbx" -var="location=westeurope" -var="aks_cluster_name=wordpress"'
 
 - stage: Applying
   displayName: Deployment applying
@@ -56,16 +47,9 @@ stages:
           scriptLocation: 'inlineScript'
           inlineScript: 'terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=sbx.tfstate" -backend-config="access_key=$(access_key)"'
       - task: AzureCLI@2
-        displayName: Reading plan
-        inputs:
-          azureSubscription: 'AzureCloud'
-          scriptType: 'bash'
-          scriptLocation: 'inlineScript'
-          inlineScript: echo $tfplan > sbx.tfplan
-      - task: AzureCLI@2
         displayName: Terraform apply
         inputs:
           azureSubscription: 'AzureCloud'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
-          inlineScript: 'terraform apply "sbx.tfplan"'
+          inlineScript: 'terraform apply -auto-approve'
