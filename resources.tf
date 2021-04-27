@@ -20,6 +20,10 @@ module "services" {
   location            = var.location
   environment         = var.environment
   aks_cluster_name    = var.aks_cluster_name
+  subscription_id     = var.subscription_id
+  object_id           = var.object_id
+  client_id           = var.client_id
+  tenant_id           = var.tenant_id
   depends_on = [
     module.policies.azurerm_tag_policy_assignment_id
   ]

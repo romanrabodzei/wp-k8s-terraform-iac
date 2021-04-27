@@ -13,6 +13,11 @@ variable "client_secret" {
   type        = string
 }
 
+variable "object_id" {
+  description = "Object Id"
+  type        = string
+}
+
 variable "tenant_id" {
   description = "Tenant Id"
   type        = string

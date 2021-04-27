@@ -1,8 +1,5 @@
 resource "azuread_group" "kubernetes_admin_group" {
   display_name = "Kubernetes ${var.environment} Admins"
-  members = [
-    data.azurerm_client_config.current.object_id
-  ]
 }
 
 resource "random_string" "kubernetes_cluster_sp_password" {

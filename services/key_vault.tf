@@ -1,5 +1,3 @@
-data "azurerm_client_config" "current" {}
-
 data "http" "myip" {
   url = "http://ipv4.icanhazip.com"
 }
@@ -14,9 +12,9 @@ resource "azurerm_key_vault" "key_vault" {
   enable_rbac_authorization       = false
   soft_delete_retention_days      = 14
   access_policy = [{
-    application_id = data.azurerm_client_config.current.client_id
-    object_id      = data.azurerm_client_config.current.object_id
-    tenant_id      = data.azurerm_client_config.current.tenant_id
+    application_id = var.client_id
+    object_id      = var.client_id
+    tenant_id      = var.tenant_id
     key_permissions = [
       "Backup",
       "Create",

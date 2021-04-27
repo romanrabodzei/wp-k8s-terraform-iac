@@ -1,8 +1,5 @@
 resource "azuread_group" "sql_admin_group" {
   display_name = "SQL ${var.environment} Admins"
-  members = [
-    data.azurerm_client_config.current.object_id
-  ]
 }
 
 resource "random_string" "mysql_admin_password" {
@@ -47,7 +44,7 @@ resource "azurerm_mysql_active_directory_administrator" "azurerm_mysql_firewall_
   server_name         = azurerm_mysql_server.mysql_server.name
   resource_group_name = var.resource_group_name
   login               = azuread_group.sql_admin_group.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
+  tenant_id           = var.tenant_id
   object_id           = azuread_group.sql_admin_group.object_id
 }
 
