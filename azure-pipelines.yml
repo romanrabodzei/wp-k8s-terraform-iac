@@ -15,4 +15,4 @@ steps:
     azureSubscription: 'VisualStudio'
     scriptType: 'pscore'
     scriptLocation: 'inlineScript'
-    inlineScript: 'terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=sbx" -backend-config="access_key=$(access_key)'
+    inlineScript: 'terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=sbx" -backend-config="access_key=$(access_key)"'
