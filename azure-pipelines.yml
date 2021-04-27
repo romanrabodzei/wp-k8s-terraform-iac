@@ -8,15 +8,10 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: TerraformTaskV1@0
+
+- task: AzureCLI@2
   inputs:
-    provider: 'azurerm'
-    command: 'init'
-    commandOptions: '-backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=sbx" -backend-config="access_key=$(access_key)"'
-    environmentServiceNameAzureRM: 'VisualStudio'
-- task: TerraformTaskV1@0
-  inputs:
-    provider: 'azurerm'
-    command: 'plan'
-    commandOptions: '-var="company=intvsn" -var="client=lab" -var="environment=sbx" -var="location=westeurope" -var="aks_cluster_name=wordpress"'
-    environmentServiceNameAzureRM: 'VisualStudio'
+    azureSubscription: 'VisualStudio'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    inlineScript: 'terraform version'
