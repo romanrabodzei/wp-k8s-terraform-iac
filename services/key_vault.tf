@@ -90,11 +90,21 @@ resource "azurerm_key_vault" "key_vault" {
 }
 
 # AKV secrets and access policies
+resource "azurerm_key_vault_access_policy" "devops_access_policy" {
+  key_vault_id = azurerm_key_vault.key_vault.id
+  object_id    = var.client_id
+  tenant_id    = var.tenant_id
 
-resource "azurerm_role_assignment" "key_vault_administrator" {
-  scope                = azurerm_key_vault.key_vault.id
-  role_definition_name = "Key Vault Administrator"
-  principal_id         = var.object_id
+  secret_permissions = [
+    "Backup",
+    "Delete",
+    "Get",
+    "List",
+    "Purge",
+    "Recover",
+    "Restore",
+    "Set"
+  ]
 }
 
 resource "azurerm_key_vault_secret" "mysql_secret" {
@@ -103,12 +113,6 @@ resource "azurerm_key_vault_secret" "mysql_secret" {
   key_vault_id = azurerm_key_vault.key_vault.id
 }
 
-resource "azurerm_role_assignment" "key_vault_secrets_user" {
-  scope                = azurerm_key_vault.key_vault.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_mysql_server.mysql_server.identity[0].principal_id
-}
-/*
 resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
   key_vault_id = azurerm_key_vault.key_vault.id
   tenant_id    = azurerm_mysql_server.mysql_server.identity[0].tenant_id
@@ -118,4 +122,4 @@ resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
     "Get",
     "List"
   ]
-}*/
+}
