@@ -2,7 +2,7 @@ trigger:
 - main
 
 variables:
-- group: VisualStudio
+- group: Variables
 
 pool:
   vmImage: ubuntu-latest
@@ -17,14 +17,14 @@ stages:
       - task: AzureCLI@2
         displayName: Terraform init
         inputs:
-          azureSubscription: 'VisualStudio'
+          azureSubscription: 'AzureCloud'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=sbx" -backend-config="access_key=$(access_key)"'
       - task: AzureCLI@2
         displayName: Terraform plan
         inputs:
-          azureSubscription: 'VisualStudio'
+          azureSubscription: 'AzureCloud'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'terraform plan -var="company=intvsn" -var="client=lab" -var="environment=sbx" -var="location=westeurope" -var="aks_cluster_name=wordpress" -out="sbx.tfplan"'
@@ -42,7 +42,7 @@ stages:
       - task: AzureCLI@2
         displayName: Terraform apply
         inputs:
-          azureSubscription: 'VisualStudio'
+          azureSubscription: 'AzureCloud'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'terraform apply "sbx.tfplan"'
