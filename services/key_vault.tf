@@ -11,67 +11,6 @@ resource "azurerm_key_vault" "key_vault" {
   enabled_for_template_deployment = true
   enable_rbac_authorization       = false
   soft_delete_retention_days      = 14
-  /*access_policy = [{
-    application_id = var.client_id
-    object_id      = var.client_id
-    tenant_id      = var.tenant_id
-    key_permissions = [
-      "Backup",
-      "Create",
-      "Delete",
-      "Get",
-      "Import",
-      "List",
-      "Purge",
-      "Recover",
-      "Restore",
-      "Update"
-    ]
-    secret_permissions = [
-      "Backup",
-      "Delete",
-      "Get",
-      "List",
-      "Purge",
-      "Recover",
-      "Restore",
-      "Set"
-    ]
-    certificate_permissions = [
-      "Backup",
-      "Create",
-      "Delete",
-      "DeleteIssuers",
-      "Get",
-      "GetIssuers",
-      "Import",
-      "List",
-      "ListIssuers",
-      "ManageContacts",
-      "ManageIssuers",
-      "Purge",
-      "Recover",
-      "Restore",
-      "SetIssuers",
-      "Update"
-    ]
-    storage_permissions = [
-      "backup",
-      "delete",
-      "deletesas",
-      "get",
-      "getsas",
-      "list",
-      "listsas",
-      "purge",
-      "recover",
-      "regeneratekey",
-      "restore",
-      "set",
-      "setsas",
-      "update"
-    ]
-  }]*/
   network_acls {
     default_action = "Deny"
     bypass         = "AzureServices"
@@ -104,6 +43,9 @@ resource "azurerm_key_vault_access_policy" "devops_access_policy" {
     "Recover",
     "Restore",
     "Set"
+  ]
+  depends_on = [
+    azurerm_key_vault_secret.mysql_secret
   ]
 }
 
