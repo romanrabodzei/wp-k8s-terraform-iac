@@ -1,21 +1,21 @@
 variable "subscription_id" {
   description = "Subscription Id"
-  type = string
+  type        = string
 }
 
 variable "client_id" {
   description = "Client Id"
-  type = string
+  type        = string
 }
 
 variable "client_secret" {
   description = "Client Secret"
-  type = string
+  type        = string
 }
 
 variable "tenant_id" {
   description = "Tenant Id"
-  type = string
+  type        = string
 }
 
 variable "company" {
