@@ -35,8 +35,8 @@ stages:
           scriptType: 'pscore'
           scriptLocation: 'inlineScript'
           inlineScript: |
-            $sbx.tfplan = cat sbx.tfplan
-            echo "##vso[task.setvariable variable=sbx.tfplan]$sbx.tfplan"
+            $tfplan = cat sbx.tfplan
+            echo "##vso[task.setvariable variable=tfplan]$tfplan"
 
 - stage: Applying
   displayName: Deployment applying
@@ -44,7 +44,7 @@ stages:
   jobs:
     - deployment: publishinternal
       displayName: 'Approval'
-      environment: $(environmentName)
+      environment: 'sbx'
 
     - job: Applying
       steps:
@@ -54,7 +54,7 @@ stages:
           azureSubscription: 'AzureCloud'
           scriptType: 'bash'
           scriptLocation: 'inlineScript'
-          inlineScript: echo $sbx.tfplan > sbx.tfplan
+          inlineScript: echo $tfplan > sbx.tfplan
       - task: AzureCLI@2
         displayName: Terraform apply
         inputs:
