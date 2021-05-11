@@ -40,7 +40,7 @@ resource "azurerm_mysql_server" "mysql_server" {
   }
 }
 
-resource "azurerm_mysql_active_directory_administrator" "azurerm_mysql_firewall_rule" {
+resource "azurerm_mysql_active_directory_administrator" "mysql_administrator" {
   server_name         = azurerm_mysql_server.mysql_server.name
   resource_group_name = var.resource_group_name
   login               = azuread_group.sql_admin_group.name

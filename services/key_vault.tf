@@ -44,15 +44,15 @@ resource "azurerm_key_vault_access_policy" "devops_access_policy" {
     "Restore",
     "Set"
   ]
-  depends_on = [
-    azurerm_key_vault_secret.mysql_secret
-  ]
 }
 
 resource "azurerm_key_vault_secret" "mysql_secret" {
   name         = "mysqlsecret"
   value        = random_string.mysql_admin_password.result
   key_vault_id = azurerm_key_vault.key_vault.id
+  depends_on = [
+    azurerm_key_vault_access_policy.mssql_access_policy
+  ]
 }
 
 resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
@@ -63,5 +63,9 @@ resource "azurerm_key_vault_access_policy" "mssql_access_policy" {
   secret_permissions = [
     "Get",
     "List"
+  ]
+
+  depends_on = [
+    azurerm_key_vault_access_policy.devops_access_policy
   ]
 }
