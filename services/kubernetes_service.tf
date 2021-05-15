@@ -82,7 +82,7 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   }
 
   role_based_access_control {
-    enabled = true
+    enabled = false
     azure_active_directory {
       managed                = false
     }
