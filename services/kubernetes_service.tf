@@ -85,7 +85,6 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
     enabled = true
     azure_active_directory {
       managed                = false
-      #admin_group_object_ids = [azuread_group.kubernetes_admin_group.object_id]
     }
   }
 

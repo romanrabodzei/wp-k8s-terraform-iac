@@ -1,0 +1,46 @@
+variables:
+  - group: Variables
+  - name: subscription
+    value: 'AzureCloud'
+  
+pool:
+    vmImage: ubuntu-latest
+  
+stages:
+  - stage: Plan
+    displayName: Plan
+  
+    jobs: 
+      - job: Plan
+        steps:
+        - task: AzureCLI@2
+          displayName: Terraform plan
+          inputs:
+            azureSubscription: $(subscription)
+            scriptType: 'pscore'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=dev.tfstate" -backend-config="access_key=$(access_key)"
+              
+              terraform plan -var="subscription_id=$(subscription_id)" -var="client_id=$(client_id)" -var="client_secret=$(client_secret)" -var="object_id=$(object_id)" -var="tenant_id=$(tenant_id)" -var="company=intvsn" -var="client=lab" -var="environment=dev" -var="location=westeurope" -var="aks_cluster_name=wordpress"
+  
+  - stage: Build
+    displayName: Build
+  
+    jobs:
+      - deployment: publishinternal
+        displayName: 'Approval'
+        environment: 'dev'
+  
+      - job: Build
+        steps:
+        - task: AzureCLI@2
+          displayName: Terraform apply
+          inputs:
+            azureSubscription: $(subscription)
+            scriptType: 'pscore'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              terraform init -backend-config="resource_group_name=Services" -backend-config="storage_account_name=intvservicestorageacc" -backend-config="container_name=terraform" -backend-config="key=dev.tfstate" -backend-config="access_key=$(access_key)"
+              
+              terraform apply -auto-approve -var="subscription_id=$(subscription_id)" -var="client_id=$(client_id)" -var="client_secret=$(client_secret)" -var="object_id=$(object_id)" -var="tenant_id=$(tenant_id)" -var="company=intvsn" -var="client=lab" -var="environment=dev" -var="location=westeurope" -var="aks_cluster_name=wordpress"
