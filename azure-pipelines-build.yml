@@ -1,5 +1,14 @@
+parameters:
+  - environment:
+    values:
+      - dev
+      - prod
+  
+
 variables:
   - group: Variables
+  - name: environment
+    value: {{parameter.environment}}
   - name: subscription
     value: 'AzureCloud'
   
