@@ -1,5 +1,7 @@
 parameters:
-  - environment:
+  - name: environment
+    default: dev
+    type: string
     values:
       - dev
       - prod
@@ -8,7 +10,7 @@ parameters:
 variables:
   - group: Variables
   - name: environment
-    value: {{parameter.environment}}
+    value: ${{ parameter.environment }}
   - name: subscription
     value: 'AzureCloud'
   
