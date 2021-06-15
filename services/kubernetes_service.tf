@@ -56,7 +56,7 @@ resource "azurerm_kubernetes_cluster" "kubernetes_cluster" {
   dns_prefix          = lower("${var.aks_cluster_name}${var.environment}")
   default_node_pool {
     name       = "agentpool"
-    node_count = "1"
+    node_count = "2"
     vm_size    = "Standard_DS2_v2"
     availability_zones = [
       1, 2, 3
