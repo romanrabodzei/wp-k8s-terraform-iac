@@ -5,6 +5,8 @@ parameters:
     values:
       - dev
       - prod
+      - uat
+      - test
   
 
 variables:
